@@ -1,0 +1,168 @@
+<html lang="en" >
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
+	<title>Smartbox</title>
+	<style>
+	.virtualRepeatdemoScrollTo .wrapper {
+		width: 100%;
+		max-width: 100%; }
+	.virtualRepeatdemoScrollTo #vertical-container {
+		height: 400px;
+		width: 100%;
+		max-width: 100%; }
+	.min{ min-height: 100% }
+	.virtualRepeatdemoScrollTo #vertical-container .repeated-item {
+		cursor: pointer;
+		border-bottom: 1px solid #ddd;
+		box-sizing: border-box;
+		height: 50px;
+		padding-top: 10px; }
+	.virtualRepeatdemoScrollTo #vertical-container .repeated-item.selected {
+		background-color: #106CC8;
+		color: white; }
+	.virtualRepeatdemoScrollTo #vertical-container md-content {
+		margin: 16px; }
+	.virtualRepeatdemoScrollTo md-virtual-repeat-container {
+		border: solid 1px grey; }
+	.virtualRepeatdemoScrollTo .md-virtual-repeat-container .md-virtual-repeat-offsetter div:not(.header) {
+		padding-left: 2px; }
+
+	.label-success {
+		background-color: #5cb85c;
+	}
+	.label-info {
+		background-color: #5bc0de;
+	}
+	.label {
+		display: inline;
+		padding: .2em .6em .3em;
+		font-size: 75%;
+		font-weight: 700;
+		line-height: 1;
+		color: #fff;
+		text-align: center;
+		white-space: nowrap;
+		vertical-align: baseline;
+		border-radius: .25em;
+	}
+	</style>
+</head>
+<body ng-app="Smartbox" ng-cloak class="virtualRepeatdemoScrollTo">
+<div ng-controller="AppCtrl as ctrl">
+	<md-content layout="column" layout-gt-sm="row" class="md-padding min">
+		<div flex flex-gt-sm="70">
+			<md-input-container class="md-block">
+				<label>Filtro</label>
+				<input name="filtro" ng-model="ctrl.filter" />
+			</md-input-container>
+			<span>
+				Elementos cargados: {{ctrl.items.length}}
+			</span>
+			<div class="wrapper">
+				<md-virtual-repeat-container id="vertical-container" md-top-index="ctrl.topIndex">
+					<div md-virtual-repeat="item in ctrl.items | filter:ctrl.filter" class="repeated-item" flex ng-click="ctrl.select(item)" ng-class="{'selected': ctrl.selecteditem.sku === item.sku}">
+						<div layout="row">
+							<div flex="50">{{item.original_name}}</div>
+							<div flex>{{item.city}}</div>
+							<div flex="10">
+								<span class="label" ng-class="{'label-success':item.nb_personnes ==='1', 'label-info':item.nb_personnes !== '1'}" style="font-size:smaller; float:right">{{item.nb_personnes}}</span>
+								<span style="font-size:smaller">{{item.distance | number:0}}</span>
+							</div>
+						</div>
+					</div>
+				</md-virtual-repeat-container>
+			</div>
+		</div>
+		<div flex flex-gt-sm="30">
+			<md-content layout="column" class="md-padding" ng-if="ctrl.selecteditem">
+				<md-card>
+					<md-button class="md-fab md-raised md-primary" aria-label="Cerrar" ng-click="ctrl.reset()">X
+					</md-button>
+					<img ng-src="{{ctrl.selecteditem.img_large}}" class="md-card-image" alt="IMG" style="max-height:295px;max-width:295px; margin:auto">
+					<md-card-title>
+					  <md-card-title-text>
+						<span class="md-headline">{{ctrl.selecteditem.original_name}}</span>
+					  </md-card-title-text>
+					</md-card-title>
+					<md-card-content>
+						<h3>{{ctrl.selecteditem.city}}</h3>
+						<h5 style="font-style:italic">{{ctrl.selecteditem.subtitle}}</h5>
+					  <p>
+						{{ctrl.selecteditem.short_description}}
+					  </p>
+					</md-card-content>
+					<md-card-actions layout="row" layout-align="end center">
+						<md-button class="md-raised md-primary" aria-label="Ir" href="{{ctrl.selecteditem.url}}" target="_blank">Ir
+						</md-button>
+					</md-card-actions>
+				</md-card>
+
+			</md-content>
+		</div>
+		<br style="clear:both" />
+	</md-content>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+ <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-resource.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+<script>
+
+(function () {
+	'use strict';
+
+	if (typeof Number.prototype.toRadians === 'undefined'){
+		Number.prototype.toRadians = function() {
+			return this * Math.PI / 180;
+		};
+	}
+
+	function calcularDistancia(lat1, lat2, lon1, lon2){
+		var R = 6371; // Radio del planeta tierra en km
+		var phi1 = lat1.toRadians();
+		var phi2 = lat2.toRadians();
+		var deltaphi = (lat2 - lat1).toRadians();
+		var deltalambda = (lon2 - lon1).toRadians();
+
+		var a = Math.sin(deltaphi / 2) * Math.sin(deltaphi / 2) +
+				Math.cos(phi1) * Math.cos(phi2) *
+				Math.sin(deltalambda / 2) * Math.sin(deltalambda / 2);
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+		var d = R * c;
+		return d;
+	}
+
+	angular
+		.module('Smartbox', ['ngMaterial', 'ngResource'])
+		.constant('GPS', {gps_latitude: 37.9836842, gps_longitude:-1.1257093})
+		.factory('Actividades', ['$resource', function($resource){
+			return $resource('opciones.json', {query: {method: 'GET', isArray: true }});
+		}])
+		.controller('AppCtrl', ['Actividades', 'GPS', function(Actividades, GPS) {
+			var instance = this;
+			this.items = [];
+			function joinResults(items){
+				for (var i = 0, j = items.length; i < j; i++){
+					items[i].distance = calcularDistancia(GPS.gps_latitude, parseFloat(items[i].gps_latitude), GPS.gps_longitude, parseFloat(items[i].gps_longitude) );
+				}
+				instance.items = instance.items.concat(items);
+				instance.items.sort(function(a, b){ return a.distance - b.distance; });
+			}
+			this.select = function(item){
+				this.selecteditem = item;
+			};
+			this.reset = function(){
+				delete this.selecteditem;
+			};
+			Actividades.query(joinResults);
+
+		}]);
+})();
+</script>
+</body>
+</html>
